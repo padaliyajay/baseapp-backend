@@ -1,13 +1,15 @@
 from celery import shared_task
 
 @shared_task
-def send_push_notification(user_id, message=None, **kwargs):
+def send_push_notification(user_id, **kwargs):
     # For FCM/GCM and APNS the message input should be a dict like this:
     # message={"title" : "foo", "body" : "bar"}
+    push_title = kwargs.pop("push_title", None)
+    description = kwargs.pop("push_description", None)
 
     from push_notifications.models import APNSDevice, GCMDevice, WNSDevice, WebPushDevice
-
-    message_data = {'message': message} if message is not None else {}
+    
+    message_data = {'message': {"title": push_title, "body": description}} if description is not None else {}
     message_data.update(kwargs)
 
     # send messages to all Apple devices
@@ -25,5 +27,3 @@ def send_push_notification(user_id, message=None, **kwargs):
     # send messages to all Web devices
     web_devices = WebPushDevice.objects.filter(user__id=user_id)
     web_devices.send_message(**message_data)
-
-    pass
