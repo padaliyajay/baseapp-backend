@@ -23,7 +23,7 @@ def send_notification(
     email_message=None,
     push_title=None,
     push_description=None,
-    notification_url=None,
+    extra=None,
     **kwargs,
 ):
     # TO DO:
@@ -75,16 +75,13 @@ def send_notification(
             notification.save(update_fields=["emailed"])
 
     if send_push:
-        send_push_notification.delay(
+        kwargs.pop("level", None)
+        send_push_notification(
             recipient.id,
-            dict(
-                push_title=push_title,
-                push_description=push_description or description,
-                extra={"notificationUrl": notification_url},
-                **kwargs
-                # TO DO:
-                # serialize all objects so devices can use this data if necessary
-            ),
+            push_title=push_title,
+            push_description=push_description or description,
+            extra=extra,
+            **kwargs
         )
 
     return notifications
