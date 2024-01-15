@@ -5,6 +5,7 @@ from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 from notifications.signals import notify
+from django.conf import settings
 
 from .tasks import send_push_notification
 
@@ -75,10 +76,9 @@ def send_notification(
             notification.save(update_fields=["emailed"])
 
     if send_push:
-        kwargs.pop("level", None)
-        send_push_notification(
+        send_push_notification.delay(
             recipient.id,
-            push_title=push_title,
+            push_title=push_title or settings.MOBILE_APP_NAME,
             push_description=push_description or description,
             extra=extra,
             **kwargs

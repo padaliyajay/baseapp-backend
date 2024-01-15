@@ -3,6 +3,7 @@ from django.utils.encoding import force_str
 
 @shared_task
 def send_push_notification(user_id, **kwargs):
+    kwargs.pop("level", None)
     push_title = kwargs.pop("push_title", None)
     description = kwargs.pop("push_description", None)
     extra = kwargs.pop("extra", None)
